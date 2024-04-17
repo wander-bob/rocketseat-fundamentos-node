@@ -1,0 +1,16 @@
+{
+  "name": "01-fundamentos-nodejs-desafio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch ./src/server.js"
+  },
+  "keywords": [],
+  "author": "wander-bob",
+  "license": "MIT",
+  "dependencies": {
+    "csv": "^6.3.8"
+  }
+}
