@@ -6,15 +6,16 @@ export const routes = [
     method: 'GET',
     path: '/notes',
     handler: (req, res)=>{
-      return res.writeHead(200).end('ok')
+      const notes = database.select()
+      return res.end(JSON.stringify(notes))
     }
   },
   {
     method: 'POST',
     path: '/notes',
     handler: (req, res)=>{
-      console.log(req.body)
-      
+      const data = req.body;
+      database.insert(data)
       return res.writeHead(200).end('ok')
     }
   }
