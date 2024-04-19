@@ -26,24 +26,35 @@ export const routes = [
     handler: (req, res)=>{
       const data = req.body;
       const { id } = req.params;
-      database.update('tasks',id, data)
-      return res.writeHead(200).end('ok')
+      const result = database.update('tasks',id, data)
+      if(result.code === 404){
+        return res.writeHead(404).end(JSON.stringify(result.message))
+      }
+      return res.writeHead(204).end()
     }
   },
   {
     method: 'DELETE',
     path: buildRouteParams('/tasks/:id'),
     handler: (req, res)=>{
-      
-      return res.writeHead(200).end('ok')
+      const { id } = req.params;
+      const result = database.delete('tasks', id);
+      if(result.code === 404){
+        return res.writeHead(404).end(JSON.stringify(result.message))
+      }
+      return res.writeHead(204).end()
     }
   },
   {
     method: 'PATCH',
     path: buildRouteParams('/tasks/:id/complete'),
     handler: (req, res)=>{
-      
-      return res.writeHead(200).end('ok')
+      const {id} = req.params;
+      const result = database.complete('tasks', id);
+      if(result.code === 404){
+        return res.writeHead(404).end(JSON.stringify(result.message))
+      }
+      return res.writeHead(204).end()
     }
-  }
+  },
 ]

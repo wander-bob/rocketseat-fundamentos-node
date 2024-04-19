@@ -9,5 +9,8 @@
   },
   "keywords": [],
   "author": "wander-bob",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "csv-parse": "^5.5.5"
+  }
 }

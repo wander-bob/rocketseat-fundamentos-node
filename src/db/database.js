@@ -49,20 +49,47 @@ export class Database{
     const {title, description, completed } = data;
     const tasks = this.select(table);
     const task =  tasks.find(row => row.id === id)
+    if(!task){
+      return { message: "not found", code: 404 }
+    }
     const rowIndex = tasks.findIndex(row=> row.id === id);
     const updatedTask = {
       id,
       title: title ?? task.title,
       description: description ?? task.description,
-      completed_at: completed === true || completed == "true" ? updateDate : null,
+      completed_at: null,
       created_at: task.created_at,
       updated_at: updateDate,
     }
-    if(task){
+    if(rowIndex > -1){
       this.#database[table][rowIndex] = updatedTask
+      this.#persist();
     }
+    return { message: "done", code: 204 }
   }
   delete(table, id){
-    
+    const rowIndex = this.select(table).findIndex(row=> row.id === id);
+    if(rowIndex > -1){
+      this.#database[table].splice(rowIndex, 1)
+      this.#persist();
+    }else{
+      return { message: "not found", code: 404 }
+    }
+    return { code: 204 }
+  }
+  complete(table, id){
+    const updateDate = new Date().toLocaleString().replace(',','');
+    const tasks = this.select(table);
+    const task =  tasks.find(row => row.id === id);
+    if(!task){
+      return { message: "not found", code: 404 }
+    };
+    const rowIndex = tasks.findIndex(row=> row.id === id);
+    task.completed_at = updateDate;
+    task.updated_at = updateDate;
+    if(rowIndex > -1){
+      this.#database[table][rowIndex] = task;
+    }
+    return { code: 204 }
   }
 }
