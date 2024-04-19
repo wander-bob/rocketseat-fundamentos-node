@@ -6,11 +6,6 @@ export async function csv(){
   const parser = dataStream  .pipe(parse({skip_empty_lines: true, from_line: 2}));
   for await (const value of parser){
     const [title, description] = value;
-    await postData(title, description)
-  }
-}
-async function postData(title, description){
-  setTimeout(async () => {
     await fetch('http://localhost:3333/tasks',{
       method: 'POST',
       headers: {
@@ -20,7 +15,10 @@ async function postData(title, description){
         title, description
       })
     })
-    
-  }, 1000);
+    await sleep()
+  }
+}
+function sleep(){
+  new Promise((resolve)=> setTimeout(resolve, 1000));
 }
 csv()
