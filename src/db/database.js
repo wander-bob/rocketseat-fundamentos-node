@@ -1,44 +1,68 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
-import assert from 'node:assert';
-import * as csv from 'csv';
-
 
 
 export class Database{
-  #dataPath = new URL('./db.csv', import.meta.url);
-  #database = `id,title,description,completed_at,created_at,updated_at`;
+  #dataPath = new URL('./db.json', import.meta.url);
+  #database = {};
   constructor(){
     fs.readFile(this.#dataPath, 'utf-8')
       .then(data =>{
-        this.#database = data;
+        this.#database = JSON.parse(data);
       }).catch(()=>{
         this.#persist();
       })
   }
   #persist (){
-    fs.writeFile(this.#dataPath, this.#database)
+    fs.writeFile(this.#dataPath, JSON.stringify(this.#database))
   }
-  insert(data){
-    const note = {
+  select(table, search){
+    let data =  this.#database[table]??[];
+    if(search){
+      return data = data.filter(row =>{
+        return Object.entries(search).some(([key, value])=>{
+          return row[key].toLowerCase().includes(value.toLowerCase());
+        })
+      })
+    }
+    return data;
+  }
+  insert( table , data){
+    const creationDate = new Date().toLocaleString().replace(',','');
+    const task = {
       id: randomUUID(),
       title: data.title,
       description: data.description,
-      completed_at: new Date().toLocaleString().replace(',',''),
-      created_at: new Date().toLocaleString().replace(',',''),
-      updated_at: new Date().toLocaleString().replace(',','')
+      completed_at: null,
+      created_at: creationDate,
+      updated_at: creationDate
     }
-    this.#database = `${this.#database}\n${Object.values(note)}`;
+    if(Array.isArray(this.#database[table])){
+      this.#database[table].push(task);
+    }else{
+      this.#database[table] = [task];
+    }
     this.#persist()
   }
-  select(){
-    const [tableHead, ...tableBody] = this.#database.split('\n');
-    const notes = tableBody.map(row=>{
-      return row.split(',').map((cel, index)=>{
-        return {[tableHead.split(',')[index]]: cel}
-      })
-    })
-    const result = notes.map(note => Object.assign({}, ...note))
-    return result;
+  update(table, id, data){
+    const updateDate = new Date().toLocaleString().replace(',','');
+    const {title, description, completed } = data;
+    const tasks = this.select(table);
+    const task =  tasks.find(row => row.id === id)
+    const rowIndex = tasks.findIndex(row=> row.id === id);
+    const updatedTask = {
+      id,
+      title: title ?? task.title,
+      description: description ?? task.description,
+      completed_at: completed === true || completed == "true" ? updateDate : null,
+      created_at: task.created_at,
+      updated_at: updateDate,
+    }
+    if(task){
+      this.#database[table][rowIndex] = updatedTask
+    }
+  }
+  delete(table, id){
+    
   }
 }
